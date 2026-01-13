@@ -1,47 +1,20 @@
 ---
 - hosts: all
   become: true
+
   tasks:
+    - name: Install Apache and PHP
+      ansible.builtin.package:
+        name:
+          - "{{ apache_package }}"
+          - "{{ php_package }}"
+        state: latest
+        # This line forces Fedora to use the classic dnf backend
+        # while Ubuntu safely ignores it
+        use: "{{ 'apt' if ansible_os_family == 'Debian' else 'dnf' }}"
 
-  - name: update repository index
-    ansible.builtin.apt:
-      update_cache: yes
-    when: ansible_distribution == "Ubuntu"
-
-  - name: install apache2 package
-    ansible.builtin.apt:
-      name:
-        - apache2
-        - libapache2-mod-php
-      state: latest
-    when: ansible_distribution == "Ubuntu"
-
-  - name: Check DNF version
-    ansible.builtin.command: dnf --version
-    register: dnf_version_output
-    failed_when: "'error' in dnf_version_output.stderr"
-    when: ansible_distribution == "Fedora"
-
-  - debug: 
-      var: dnf_version_output
-      msg: "{{ dnf_version_output.stderr }}"
-
-  - name: update repository index
-    ansible.builtin.dnf:
-    register: dnf_repo_update_output
-    failed_when: "'error' in dnf_repo_update_output.stderr"
-      update_cache: yes
-    when: ansible_distribution == "Fedora"
-
-  - debug:
-    var: dnv_repo_update_output
-    msg: "{{ dnf_repo_update_output.stderr }}"
-
-  - name: install httpd package
-    ansible.builtin.dnf:
-      name:
-        - httpd
-        - php
-      state: latest
-    when: ansible_distribution == "Fedora"
-
+    - name: Ensure Apache is started and enabled
+      ansible.builtin.service:
+        name: "{{ apache_package }}"
+        state: started
+        enabled: yes
