@@ -1,0 +1,6 @@
+    # Sledgehammer approach
+    - name: install mariadb package on db servers
+      ansible.builtin.command: dnf install -y mariadb
+      args:
+        creates: /usr/bin/mariadb  # This prevents it from running every time
+      when: ansible_distribution == "Fedora"

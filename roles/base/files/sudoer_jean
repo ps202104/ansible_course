@@ -1,0 +1,2 @@
+# Managed by Ansible
+jean ALL=(ALL) NOPASSWD: ALL
