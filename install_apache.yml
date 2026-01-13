@@ -1,7 +1,7 @@
 ---
-- hosts: all 
+- hosts: all
   become: true
-  tasks: 
+  tasks:
 
   - name: update repository index
     ansible.builtin.apt:
@@ -10,31 +10,38 @@
 
   - name: install apache2 package
     ansible.builtin.apt:
-      name: apache2
+      name:
+        - apache2
+        - libapache2-mod-php
       state: latest
     when: ansible_distribution == "Ubuntu"
 
-  - name: install support for php
-    ansible.builtin.apt:
-      name: libapache2-mod-php
-      state: latest
-    when: ansible_distribution == "Ubuntu" 
+  - name: Check DNF version
+    ansible.builtin.command: dnf --version
+    register: dnf_version_output
+    failed_when: "'error' in dnf_version_output.stderr"
+    when: ansible_distribution == "Fedora"
+
+  - debug: 
+      var: dnf_version_output
+      msg: "{{ dnf_version_output.stderr }}"
 
   - name: update repository index
     ansible.builtin.dnf:
+    register: dnf_repo_update_output
+    failed_when: "'error' in dnf_repo_update_output.stderr"
       update_cache: yes
     when: ansible_distribution == "Fedora"
 
+  - debug:
+    var: dnv_repo_update_output
+    msg: "{{ dnf_repo_update_output.stderr }}"
+
   - name: install httpd package
     ansible.builtin.dnf:
-      name: httpd
+      name:
+        - httpd
+        - php
       state: latest
     when: ansible_distribution == "Fedora"
-
-  - name: install support for apache
-    ansible.builtin.dnf:
-      name: php
-      state: latest
-    when: ansible_distribution == "Fedora" 
-
 
