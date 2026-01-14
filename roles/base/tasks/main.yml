@@ -1,20 +1,29 @@
-    - name: create user
-      tags: always
-      ansible.builtin.user:
-        name: jean
-        groups: root
+- name: create user
+  tags: always
+  ansible.builtin.user:
+    name: jean
+    groups: root
 
-    - name: add sudoers file for jean
-      tags: always
-      ansible.builtin.copy:
-        src: sudoer_jean
-        dest: /etc/sudoers.d/jean
-        owner: root
-        group: root
-        mode: 0440
+- name: add sudoers file for jean
+  tags: always
+  ansible.builtin.copy:
+    src: sudoer_jean
+    dest: /etc/sudoers.d/jean
+    owner: root
+    group: root
+    mode: 0440
 
-    - name: add ssh key for jean user
-      tags: always
-      ansible.builtin.authorized_key:
-        user: jean
-        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIBfcLmWiOLvthnqtdv1fL64ZdVVfMooDG2FXNW4apAV test@ubuntu-ws"
+- name: add ssh key for jean user
+  tags: always
+  ansible.builtin.authorized_key:
+    user: jean
+    key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIBfcLmWiOLvthnqtdv1fL64ZdVVfMooDG2FXNW4apAV test@ubuntu-ws"
+
+- name: configure openssh based on template 
+  ansible.builtin.template:
+    src: "{{ ssh_template_file }}"
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart_sshd  
